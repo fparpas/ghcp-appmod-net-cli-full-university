@@ -1,34 +1,30 @@
 using System;
-using System.Messaging;
-using System.Configuration;
+using System.Collections.Generic;
+using System.Threading.Channels;
 using ContosoUniversity.Models;
-using Newtonsoft.Json;
 
 namespace ContosoUniversity.Services
 {
-    public class NotificationService
+    /// <summary>
+    /// In-memory notification service backed by System.Threading.Channels.
+    /// Replaces the legacy System.Messaging / MSMQ implementation — MSMQ has no .NET Core equivalent.
+    /// For this demo app, an in-memory bounded channel provides equivalent send/receive semantics.
+    /// </summary>
+    public class NotificationService : IDisposable
     {
-        private readonly string _queuePath;
-        private readonly MessageQueue _queue;
+        private readonly Channel<Notification> _channel;
+        private readonly List<Notification> _allNotifications = new();
+        private int _nextId = 1;
 
         public NotificationService()
         {
-            // Get queue path from configuration or use default
-            _queuePath = ConfigurationManager.AppSettings["NotificationQueuePath"] ?? @".\Private$\ContosoUniversityNotifications";
-            
-            // Ensure the queue exists
-            if (!MessageQueue.Exists(_queuePath))
+            // Bounded channel: drop oldest if full (same semantics as MSMQ with a queue limit)
+            _channel = Channel.CreateBounded<Notification>(new BoundedChannelOptions(100)
             {
-                _queue = MessageQueue.Create(_queuePath);
-                _queue.SetPermissions("Everyone", MessageQueueAccessRights.FullControl);
-            }
-            else
-            {
-                _queue = new MessageQueue(_queuePath);
-            }
-            
-            // Configure queue formatter
-            _queue.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
+                FullMode = BoundedChannelFullMode.DropOldest,
+                SingleReader = false,
+                SingleWriter = false
+            });
         }
 
         public void SendNotification(string entityType, string entityId, EntityOperation operation, string userName = null)
@@ -42,6 +38,7 @@ namespace ContosoUniversity.Services
             {
                 var notification = new Notification
                 {
+                    Id = _nextId++,
                     EntityType = entityType,
                     EntityId = entityId,
                     Operation = operation.ToString(),
@@ -51,18 +48,17 @@ namespace ContosoUniversity.Services
                     IsRead = false
                 };
 
-                var jsonMessage = JsonConvert.SerializeObject(notification);
-                var message = new Message(jsonMessage)
+                // Keep in-memory list for retrieval
+                lock (_allNotifications)
                 {
-                    Label = $"{entityType} {operation}",
-                    Priority = MessagePriority.Normal
-                };
+                    _allNotifications.Add(notification);
+                }
 
-                _queue.Send(message);
+                // Also write to channel (fire-and-forget; TryWrite is non-blocking)
+                _channel.Writer.TryWrite(notification);
             }
             catch (Exception ex)
             {
-                // Log error but don't break the main operation
                 System.Diagnostics.Debug.WriteLine($"Failed to send notification: {ex.Message}");
             }
         }
@@ -71,13 +67,8 @@ namespace ContosoUniversity.Services
         {
             try
             {
-                var message = _queue.Receive(TimeSpan.FromSeconds(1));
-                var jsonContent = message.Body.ToString();
-                return JsonConvert.DeserializeObject<Notification>(jsonContent);
-            }
-            catch (MessageQueueException ex) when (ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
-            {
-                // No messages available
+                if (_channel.Reader.TryRead(out var notification))
+                    return notification;
                 return null;
             }
             catch (Exception ex)
@@ -87,34 +78,46 @@ namespace ContosoUniversity.Services
             }
         }
 
-        public void MarkAsRead(int notificationId)
+        /// <summary>Returns all notifications (read + unread), newest first.</summary>
+        public IReadOnlyList<Notification> GetAllNotifications()
         {
-            // In a real implementation, you might want to store notifications in database as well
-            // for persistence and tracking read status
+            lock (_allNotifications)
+            {
+                var copy = new List<Notification>(_allNotifications);
+                copy.Sort((a, b) => b.CreatedAt.CompareTo(a.CreatedAt));
+                return copy;
+            }
         }
 
-        private string GenerateMessage(string entityType, string entityId, string entityDisplayName, EntityOperation operation)
+        public void MarkAsRead(int notificationId)
         {
-            var displayText = !string.IsNullOrWhiteSpace(entityDisplayName) 
-                ? $"{entityType} '{entityDisplayName}'" 
+            lock (_allNotifications)
+            {
+                var notification = _allNotifications.Find(n => n.Id == notificationId);
+                if (notification != null)
+                    notification.IsRead = true;
+            }
+        }
+
+        private static string GenerateMessage(string entityType, string entityId, string entityDisplayName, EntityOperation operation)
+        {
+            var displayText = !string.IsNullOrWhiteSpace(entityDisplayName)
+                ? $"{entityType} '{entityDisplayName}'"
                 : $"{entityType} (ID: {entityId})";
 
-            switch (operation)
+            return operation switch
             {
-                case EntityOperation.CREATE:
-                    return $"New {displayText} has been created";
-                case EntityOperation.UPDATE:
-                    return $"{displayText} has been updated";
-                case EntityOperation.DELETE:
-                    return $"{displayText} has been deleted";
-                default:
-                    return $"{displayText} operation: {operation}";
-            }
+                EntityOperation.CREATE => $"New {displayText} has been created",
+                EntityOperation.UPDATE => $"{displayText} has been updated",
+                EntityOperation.DELETE => $"{displayText} has been deleted",
+                _ => $"{displayText} operation: {operation}"
+            };
         }
 
         public void Dispose()
         {
-            _queue?.Dispose();
+            _channel.Writer.TryComplete();
         }
     }
 }
+
