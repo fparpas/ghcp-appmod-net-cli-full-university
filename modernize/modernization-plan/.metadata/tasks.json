@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "tasks": [
+    {
+      "type": "upgrade",
+      "id": "001-upgrade-dotnet",
+      "description": "Upgrade ContosoUniversity from .NET Framework 4.8 to .NET 10 (net10.0), converting the project to SDK-style format and migrating ASP.NET MVC 5 to ASP.NET Core MVC.",
+      "reason": "The project targets .NET Framework 4.8 which is end-of-life for mainstream support and cannot use modern Azure SDKs (Azure.*) reliably. The non-SDK-style project format, System.Web dependencies, and legacy patterns (Global.asax, RouteConfig, BundleConfig) must all be updated for cloud deployment.",
+      "requirements": "Convert the project file to SDK-style format. Change target framework to net10.0. Migrate ASP.NET MVC 5 (System.Web.Mvc) to ASP.NET Core MVC. Replace Global.asax application lifecycle hooks with Program.cs and middleware pipeline. Convert RouteConfig to ASP.NET Core route mappings. Remove System.Web.Optimization (BundleConfig) and replace bundle/minification references in views with direct HTML script/link tags. Remove incompatible NuGet packages and update remaining packages to versions compatible with net10.0. Resolve all binary and source incompatibilities identified in the assessment. Ensure the project compiles and all existing tests pass.",
+      "dependencies": [],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "002-transform-msmq-to-servicebus",
+      "description": "Replace MSMQ-based NotificationService with Azure Service Bus for reliable cloud messaging.",
+      "reason": "The application uses System.Messaging (MSMQ) in NotificationService.cs, which is Windows-only, not supported in .NET Core on Linux, and not compatible with cloud deployments. MSMQ must be replaced with a cloud-native messaging service.",
+      "requirements": "Migrate all System.Messaging (MSMQ) usage in Services/NotificationService.cs to Azure Service Bus using Managed Identity (DefaultAzureCredential) for authentication. Replace MessageQueue creation, send, and receive operations with Azure Service Bus SDK equivalents. Preserve the existing notification contract (entityType, entityId, operation, message). Remove the System.Messaging assembly reference. Addresses assessment issues: MSMQ usage is detected, Convert System.Messaging to MSMQ in .NET Core, Binary incompatible for selected .NET version (MSMQ-related), MSMQ & Message Queuing.",
+      "dependencies": ["001-upgrade-dotnet"],
+      "skills": [
+        {
+          "name": "migration-azure-servicebus",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "003-transform-sql-to-azure-sql",
+      "description": "Migrate the SQL Server database connection to Azure SQL Database with Managed Identity (passwordless authentication).",
+      "reason": "The application uses a hardcoded SQL Server connection string in Web.config with Integrated Security, which is not compatible with cloud deployments and does not follow the principle of least privilege. Azure SQL Database with Managed Identity provides a secure, passwordless alternative.",
+      "requirements": "Migrate the SQL Server connection string from Web.config to use Azure SQL Database with Managed Identity (DefaultAzureCredential / passwordless). Update EF Core configuration to use the Azure SQL provider with token-based authentication compatible with .NET 10. Remove hardcoded connection strings. Ensure the DbContext is properly registered for Managed Identity access. Addresses assessment issues: SQL database connection detected, Connection strings without configuration builders detected.",
+      "dependencies": ["001-upgrade-dotnet"],
+      "skills": [
+        {
+          "name": "migration-azure-sql-database",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "004-transform-local-io-to-blob-storage",
+      "description": "Migrate local disk file upload operations in CoursesController to Azure Blob Storage.",
+      "reason": "The application uses Server.MapPath and local file system operations (Directory, File, SaveAs) in CoursesController.cs to store teaching material images. Local file I/O is not supported in cloud-hosted stateless App Service deployments and files would be lost on restarts.",
+      "requirements": "Replace all local disk file operations in Controllers/CoursesController.cs with Azure Blob Storage SDK operations using Managed Identity (DefaultAzureCredential). Migrate file upload (SaveAs), path resolution (Server.MapPath ~/Uploads/TeachingMaterials/), and directory creation operations to Azure Blob Storage container operations. Update TeachingMaterialImagePath to store blob URLs instead of local paths. Addresses assessment issues: Local or network IO operations detected, Static content detected.",
+      "dependencies": ["001-upgrade-dotnet"],
+      "skills": [
+        {
+          "name": "migration-azure-storage-blob",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "005-transform-windows-auth-to-entra-id",
+      "description": "Replace Windows Authentication with Microsoft Entra ID for user authentication.",
+      "reason": "The application is configured for Windows Authentication (IISExpressWindowsAuthentication enabled in ContosoUniversity.csproj, Windows auth in Web.config). Windows Authentication is not supported in cloud-hosted Linux App Service environments and is not suitable for internet-facing applications.",
+      "requirements": "Replace Windows Authentication configuration with Microsoft Entra ID (formerly Azure AD) authentication. Configure the ASP.NET Core authentication middleware to use Microsoft Entra ID. Update Web.config / project settings to disable Windows Authentication. Ensure authorization attributes and identity checks are updated to work with Entra ID claims. Addresses assessment issues: Windows authentication detected.",
+      "dependencies": ["001-upgrade-dotnet"],
+      "skills": [
+        {
+          "name": "migration-microsoft-entra-id",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "006-transform-console-logging",
+      "description": "Configure structured console logging for cloud-native log aggregation in Azure App Service.",
+      "reason": "The application uses System.Diagnostics.Debug.WriteLine for logging in NotificationService.cs and other places, which is not captured by Azure App Service log streaming or Application Insights. Cloud-native logging requires structured output to stdout/stderr.",
+      "requirements": "Set up console logging using the .NET logging abstractions (ILogger<T>) configured for console output suitable for Azure App Service log aggregation. Replace System.Diagnostics.Debug.WriteLine calls with proper ILogger usage. Ensure log output format is compatible with Azure Monitor / App Service diagnostics. Addresses assessment issues: Legacy Configuration System (logging aspects).",
+      "dependencies": ["001-upgrade-dotnet"],
+      "skills": [
+        {
+          "name": "migration-console-logging",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "007-transform-appsettings-to-app-configuration",
+      "description": "Externalize non-secret application settings from Web.config to Azure App Configuration.",
+      "reason": "The application stores all configuration in Web.config including app settings and connection strings without using configuration builders. Hardcoded configuration prevents environment-specific overrides and is a security risk. Azure App Configuration provides centralized, dynamic configuration management.",
+      "requirements": "Migrate non-secret application settings from Web.config / appsettings to Azure App Configuration using Managed Identity. Ensure the existing IConfiguration / IOptions<T> shape is preserved so that no application code changes are needed beyond configuration registration. Emit a .azure/configuration-migration.json seed file for the deployment agent. Addresses assessment issues: Connection strings without configuration builders detected, Legacy Configuration System.",
+      "dependencies": ["001-upgrade-dotnet"],
+      "skills": [
+        {
+          "name": "migration-local-appsettings-azure-app-configuration",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "008-security-cve-remediation",
+      "description": "Scan all project dependencies for known CVEs and remediate identified vulnerabilities.",
+      "reason": "The assessment identified that the project contains NuGet packages with known security vulnerabilities and deprecated packages. These must be remediated before production deployment.",
+      "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, current version, upgraded version, and breaking change risk. Verify the project builds and all tests pass after remediation. Addresses assessment issues: NuGet package contains security vulnerability, NuGet package is deprecated, NuGet package upgrade is recommended.",
+      "dependencies": ["002-transform-msmq-to-servicebus", "003-transform-sql-to-azure-sql", "004-transform-local-io-to-blob-storage", "005-transform-windows-auth-to-entra-id", "006-transform-console-logging", "007-transform-appsettings-to-app-configuration"],
+      "skills": [
+        {
+          "name": "validate-cves-and-fix",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "infrastructure",
+      "id": "009-infrastructure-bicep",
+      "description": "Generate Bicep IaC files and provision all required Azure resources in SwedenCentral under resource group app-mod-cli-full-uni.",
+      "reason": "Azure resources must be provisioned before the application can be deployed. The application requires Azure App Service, Azure SQL Database, Azure Service Bus, Azure Blob Storage, and Azure App Configuration.",
+      "requirements": "Generate Bicep IaC files for: Azure App Service Plan and App Service (for .NET 10 web app), Azure SQL Database, Azure Service Bus namespace and queue, Azure Storage Account with blob container for teaching materials, Azure App Configuration instance. Provision all resources in the SwedenCentral region under resource group app-mod-cli-full-uni. Configure Managed Identity for all service-to-service authentication. Assign appropriate RBAC roles to the App Service Managed Identity.",
+      "environmentConfiguration": "region: swedencentral, resourceGroup: app-mod-cli-full-uni",
+      "dependencies": ["008-security-cve-remediation"],
+      "iacType": "bicep",
+      "provision": true,
+      "skills": [
+        {
+          "name": "infrastructure-bicep-generation",
+          "location": "builtin"
+        }
+      ]
+    },
+    {
+      "type": "deployment",
+      "id": "010-deployment-appservice",
+      "description": "Deploy the upgraded ContosoUniversity application to Azure App Service.",
+      "reason": "The application needs to be deployed to Azure App Service after all migration tasks and infrastructure provisioning are complete.",
+      "requirements": "Build and deploy the .NET 10 application to the Azure App Service provisioned in SwedenCentral (resource group: app-mod-cli-full-uni). Configure application settings including Azure App Configuration endpoint. Ensure Managed Identity is enabled and RBAC roles are correctly assigned for Azure SQL, Service Bus, Blob Storage, and App Configuration. Verify the deployment is healthy.",
+      "environmentConfiguration": "region: swedencentral, resourceGroup: app-mod-cli-full-uni",
+      "dependencies": ["009-infrastructure-bicep"],
+      "targetAzureService": "Azure App Service",
+      "resourceStatus": "new resource to be created",
+      "deploymentTool": "bicep",
+      "skills": [
+        {
+          "name": "azcli-appservice-deploy",
+          "location": "builtin"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "planName": "modernization-plan",
+    "projectName": "ContosoUniversity",
+    "language": "dotnet",
+    "createdAt": "2026-05-29T18:08:31.245+03:00",
+    "version": "1.0"
+  }
+}
