@@ -3,7 +3,7 @@
   "operationId": "157361c8-43b5-4831-8d55-62c6388868b4",
   "description": "Upgrade .NET projects to newer .NET versions, including guidance on current release status, support lifecycle (LTS/STS), and recommended upgrade targets.",
   "startTime": "2026-05-29T20:14:30.7029542Z",
-  "lastUpdateTime": "2026-05-29T20:38:51.8003164Z",
+  "lastUpdateTime": "2026-05-29T20:41:12.8110397Z",
   "properties": {
     "UpgradeTargetFramework": "net10.0",
     "taskStates": {
@@ -19,7 +19,7 @@
       "02.08-instructors-controller": "Completed",
       "02.09-notifications-controller": "Completed",
       "02.10-layout-and-shared-views": "Completed",
-      "03-validation": "InProgress"
+      "03-validation": "Completed"
     }
   },
   "folderPath": ""
