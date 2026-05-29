@@ -5,6 +5,7 @@
     {
       "type": "upgrade",
       "id": "001-upgrade-dotnet",
+      "status": "started",
       "description": "Upgrade ContosoUniversity from .NET Framework 4.8 to .NET 10 (net10.0), converting the project to SDK-style format and migrating ASP.NET MVC 5 to ASP.NET Core MVC.",
       "reason": "The project targets .NET Framework 4.8 which is end-of-life for mainstream support and cannot use modern Azure SDKs (Azure.*) reliably. The non-SDK-style project format, System.Web dependencies, and legacy patterns (Global.asax, RouteConfig, BundleConfig) must all be updated for cloud deployment.",
       "requirements": "Convert the project file to SDK-style format. Change target framework to net10.0. Migrate ASP.NET MVC 5 (System.Web.Mvc) to ASP.NET Core MVC. Replace Global.asax application lifecycle hooks with Program.cs and middleware pipeline. Convert RouteConfig to ASP.NET Core route mappings. Remove System.Web.Optimization (BundleConfig) and replace bundle/minification references in views with direct HTML script/link tags. Remove incompatible NuGet packages and update remaining packages to versions compatible with net10.0. Resolve all binary and source incompatibilities identified in the assessment. Ensure the project compiles and all existing tests pass.",
