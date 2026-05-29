@@ -34,3 +34,40 @@ During the modernization demo, GitHub Copilot can identify and help migrate thes
 - **Azure Service Bus** instead of MSMQ
 - **Azure Key Vault** for secure secrets management
 
+## Modernization Assessment Report
+
+An aggregated assessment report was generated on **May 29, 2026** and is available at [`modernize/assessment/reports-20260529150535/index.html`](modernize/assessment/reports-20260529150535/index.html).
+
+### Summary
+
+| Attribute | Value |
+|---|---|
+| Application | ghcp-appmod-net-cli-full-university |
+| Component | ContosoUniversity |
+| Current Framework | .NET Framework 4.8 |
+| Target | .NET 10 on Azure App Service |
+| Modernization Strategy | Replatform |
+| Estimated Effort | Medium (18 SP) |
+
+### Issues Found
+
+| Severity | Count | Description |
+|---|---|---|
+| Mandatory | 15 | Blockers that must be resolved before migration |
+| Potential | 5 | Recommended to address |
+| Optional | 4 | Nice-to-have improvements |
+
+### Recommended Azure Services
+
+| Service | Replaces | Estimated Monthly Cost |
+|---|---|---|
+| Azure SQL Database (S0) | SQL Server LocalDB | ~$15 |
+| Azure Blob Storage (Hot LRS) | Local file system | ~$5 |
+| Azure Service Bus (Standard) | MSMQ | ~$10 |
+| Azure Key Vault with Managed Identity | Plaintext secrets in config | ~$5 |
+| Microsoft Entra ID (P1) | Windows AD / local auth | ~$6 |
+| Azure App Service (B1) | Local IIS hosting | ~$32 |
+| **Total** | | **~$73/month** |
+
+> **Note:** Cost estimates are directional and based on Azure retail pricing for a dev/test baseline environment. Actual production costs will vary.
+
