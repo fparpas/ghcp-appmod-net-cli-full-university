@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Services;
@@ -16,8 +17,8 @@ namespace ContosoUniversity.Controllers
     {
         private readonly IBlobStorageService _blobStorageService;
 
-        public CoursesController(SchoolContext context, NotificationService notificationSvc, IBlobStorageService blobStorageService)
-            : base(context, notificationSvc)
+        public CoursesController(SchoolContext context, NotificationService notificationSvc, IBlobStorageService blobStorageService, ILogger<BaseController> logger)
+            : base(context, notificationSvc, logger)
         {
             _blobStorageService = blobStorageService;
         }

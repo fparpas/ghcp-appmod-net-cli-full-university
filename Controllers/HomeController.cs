@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models.SchoolViewModels;
 using ContosoUniversity.Services;
@@ -9,8 +10,8 @@ namespace ContosoUniversity.Controllers
 {
     public class HomeController : BaseController
     {
-        public HomeController(SchoolContext context, NotificationService notificationSvc)
-            : base(context, notificationSvc) { }
+        public HomeController(SchoolContext context, NotificationService notificationSvc, ILogger<BaseController> logger)
+            : base(context, notificationSvc, logger) { }
 
         public IActionResult Index()
         {

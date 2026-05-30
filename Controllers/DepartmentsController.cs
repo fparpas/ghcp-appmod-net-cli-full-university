@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Services;
@@ -11,8 +12,8 @@ namespace ContosoUniversity.Controllers
 {
     public class DepartmentsController : BaseController
     {
-        public DepartmentsController(SchoolContext context, NotificationService notificationSvc)
-            : base(context, notificationSvc) { }
+        public DepartmentsController(SchoolContext context, NotificationService notificationSvc, ILogger<BaseController> logger)
+            : base(context, notificationSvc, logger) { }
 
         // GET: Departments
         public IActionResult Index()

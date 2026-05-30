@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Models.SchoolViewModels;
@@ -13,8 +14,8 @@ namespace ContosoUniversity.Controllers
 {
     public class InstructorsController : BaseController
     {
-        public InstructorsController(SchoolContext context, NotificationService notificationSvc)
-            : base(context, notificationSvc) { }
+        public InstructorsController(SchoolContext context, NotificationService notificationSvc, ILogger<BaseController> logger)
+            : base(context, notificationSvc, logger) { }
 
         // GET: Instructors
         public IActionResult Index(int? id, int? courseID)

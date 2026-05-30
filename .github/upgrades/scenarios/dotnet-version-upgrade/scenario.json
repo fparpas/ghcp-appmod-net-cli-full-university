@@ -3,7 +3,7 @@
   "operationId": "157361c8-43b5-4831-8d55-62c6388868b4",
   "description": "Upgrade .NET projects to newer .NET versions, including guidance on current release status, support lifecycle (LTS/STS), and recommended upgrade targets.",
   "startTime": "2026-05-29T20:14:30.7029542Z",
-  "lastUpdateTime": "2026-05-30T05:24:28.0396778Z",
+  "lastUpdateTime": "2026-05-30T05:39:05.5124459Z",
   "properties": {
     "UpgradeTargetFramework": "net10.0",
     "taskStates": {
@@ -21,7 +21,8 @@
       "02.10-layout-and-shared-views": "Completed",
       "03-validation": "Completed",
       "002-transform-msmq-to-servicebus": "Completed",
-      "003-transform-sql-to-azure-sql": "Completed"
+      "003-transform-sql-to-azure-sql": "Completed",
+      "005-transform-windows-auth-to-entra-id": "Completed"
     }
   },
   "folderPath": ""

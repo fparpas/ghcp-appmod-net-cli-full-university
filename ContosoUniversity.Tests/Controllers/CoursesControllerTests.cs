@@ -53,7 +53,7 @@ namespace ContosoUniversity.Tests.Controllers
                 new FakeServiceBusProcessor(),
                 NullLogger<NotificationService>.Instance);
 
-            _controller = new CoursesController(_context, notificationService, _blobServiceMock.Object);
+            _controller = new CoursesController(_context, notificationService, _blobServiceMock.Object, NullLogger<BaseController>.Instance);
         }
 
         public void Dispose()

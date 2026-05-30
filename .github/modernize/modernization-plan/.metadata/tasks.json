@@ -81,7 +81,13 @@
     {
       "type": "transform",
       "id": "004-transform-local-io-to-blob-storage",
-      "status": "started",
+      "status": "success",
+      "summary": "Migrated local disk file operations in CoursesController to Azure Blob Storage with DefaultAzureCredential. Created IBlobStorageService interface and AzureBlobStorageService implementation. All file upload/delete operations now use Azure Blob Storage SDK. Added 11 unit tests. Build: 0 errors. Tests: 48/48 passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      },
       "description": "Migrate local disk file upload operations in CoursesController to Azure Blob Storage.",
       "reason": "The application uses Server.MapPath and local file system operations (Directory, File, SaveAs) in CoursesController.cs to store teaching material images. Local file I/O is not supported in cloud-hosted stateless App Service deployments and files would be lost on restarts.",
       "requirements": "Replace all local disk file operations in Controllers/CoursesController.cs with Azure Blob Storage SDK operations using Managed Identity (DefaultAzureCredential). Migrate file upload (SaveAs), path resolution (Server.MapPath ~/Uploads/TeachingMaterials/), and directory creation operations to Azure Blob Storage container operations. Update TeachingMaterialImagePath to store blob URLs instead of local paths. Addresses assessment issues: Local or network IO operations detected, Static content detected.",
@@ -103,6 +109,13 @@
     {
       "type": "transform",
       "id": "005-transform-windows-auth-to-entra-id",
+      "status": "success",
+      "summary": "Replaced Windows Authentication with Microsoft Entra ID. Added Microsoft.Identity.Web 3.7.1 packages, configured OIDC auth in Program.cs and appsettings.json, updated BaseController to read Entra ID claims, added Sign In/Out UI to layout. Build: 0 errors. Tests: 48/48 passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
       "description": "Replace Windows Authentication with Microsoft Entra ID for user authentication.",
       "reason": "The application is configured for Windows Authentication (IISExpressWindowsAuthentication enabled in ContosoUniversity.csproj, Windows auth in Web.config). Windows Authentication is not supported in cloud-hosted Linux App Service environments and is not suitable for internet-facing applications.",
       "requirements": "Replace Windows Authentication configuration with Microsoft Entra ID (formerly Azure AD) authentication. Configure the ASP.NET Core authentication middleware to use Microsoft Entra ID. Update Web.config / project settings to disable Windows Authentication. Ensure authorization attributes and identity checks are updated to work with Entra ID claims. Addresses assessment issues: Windows authentication detected.",
@@ -124,6 +137,7 @@
     {
       "type": "transform",
       "id": "006-transform-console-logging",
+      "status": "started",
       "description": "Configure structured console logging for cloud-native log aggregation in Azure App Service.",
       "reason": "The application uses System.Diagnostics.Debug.WriteLine for logging in NotificationService.cs and other places, which is not captured by Azure App Service log streaming or Application Insights. Cloud-native logging requires structured output to stdout/stderr.",
       "requirements": "Set up console logging using the .NET logging abstractions (ILogger\u003CT\u003E) configured for console output suitable for Azure App Service log aggregation. Replace System.Diagnostics.Debug.WriteLine calls with proper ILogger usage. Ensure log output format is compatible with Azure Monitor / App Service diagnostics. Addresses assessment issues: Legacy Configuration System (logging aspects).",

@@ -2,17 +2,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Services;
-using System.Diagnostics;
 
 namespace ContosoUniversity.Controllers
 {
     public class StudentsController : BaseController
     {
-        public StudentsController(SchoolContext context, NotificationService notificationSvc)
-            : base(context, notificationSvc) { }
+        public StudentsController(SchoolContext context, NotificationService notificationSvc, ILogger<BaseController> logger)
+            : base(context, notificationSvc, logger) { }
 
         // GET: Students
         public IActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
@@ -120,7 +120,7 @@ namespace ContosoUniversity.Controllers
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Error creating student: {ex.Message} | Student: {student?.FirstMidName} {student?.LastName} | EnrollmentDate: {student?.EnrollmentDate} | Stack: {ex.StackTrace}");
+                _logger.LogError(ex, "Error creating student {FirstName} {LastName} (EnrollmentDate: {EnrollmentDate}): {Message}", student?.FirstMidName, student?.LastName, student?.EnrollmentDate, ex.Message);
                 ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
             }
             return View(student);
@@ -171,7 +171,7 @@ namespace ContosoUniversity.Controllers
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Error editing student: {ex.Message} | Student ID: {student?.ID} | Stack: {ex.StackTrace}");
+                _logger.LogError(ex, "Error editing student {StudentId}: {Message}", student?.ID, ex.Message);
                 ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
             }
             return View(student);
@@ -210,7 +210,7 @@ namespace ContosoUniversity.Controllers
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Error deleting student: {ex.Message} | Student ID: {id} | Stack: {ex.StackTrace}");
+                _logger.LogError(ex, "Error deleting student {StudentId}: {Message}", id, ex.Message);
                 TempData["ErrorMessage"] = "Unable to delete the student. Try again, and if the problem persists see your system administrator.";
                 return RedirectToAction("Index");
             }
