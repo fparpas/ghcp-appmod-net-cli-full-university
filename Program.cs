@@ -3,11 +3,20 @@ using Azure.Storage.Blobs;
 using ContosoUniversity.Data;
 using ContosoUniversity.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add MVC services
-builder.Services.AddControllersWithViews();
+// Add Microsoft Entra ID authentication
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration);
+
+// Add MVC services with Microsoft Identity UI (provides /MicrosoftIdentity/Account/SignIn and SignOut endpoints)
+builder.Services.AddControllersWithViews()
+    .AddMicrosoftIdentityUI();
+
+// Add Razor Pages (required by Microsoft.Identity.Web.UI)
+builder.Services.AddRazorPages();
 
 // Add EF Core with SQL Server
 builder.Services.AddDbContext<SchoolContext>(options =>
@@ -42,11 +51,14 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapRazorPages();
 
 // Initialize the database
 using (var scope = app.Services.CreateScope())

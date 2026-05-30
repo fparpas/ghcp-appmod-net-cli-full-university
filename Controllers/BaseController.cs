@@ -26,7 +26,13 @@ namespace ContosoUniversity.Controllers
         {
             try
             {
-                var userName = "System"; // No authentication, use System as default user
+                // Prefer Entra ID 'name' claim, fall back to identity name, then 'System'
+                var userName = User?.Identity?.IsAuthenticated == true
+                    ? (User.FindFirst("name")?.Value
+                       ?? User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                       ?? User.Identity.Name
+                       ?? "Unknown")
+                    : "System";
                 notificationService.SendNotification(entityType, entityId, entityDisplayName, operation, userName);
             }
             catch (Exception ex)
