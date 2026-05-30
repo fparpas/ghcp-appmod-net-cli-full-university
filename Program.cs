@@ -2,10 +2,18 @@ using Azure.Identity;
 using Azure.Storage.Blobs;
 using ContosoUniversity.Data;
 using ContosoUniversity.Services;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+
+// Register the Azure AD authentication providers for Microsoft.Data.SqlClient v7+
+// This re-enables the 'Authentication=Active Directory Default' connection string keyword
+// which was moved to the Microsoft.Data.SqlClient.Extensions.Azure package in v7.
+SqlAuthenticationProvider.SetProvider(
+    SqlAuthenticationMethod.ActiveDirectoryDefault,
+    new ActiveDirectoryAuthenticationProvider());
 
 var builder = WebApplication.CreateBuilder(args);
 
