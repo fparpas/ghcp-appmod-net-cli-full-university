@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Storage.Blobs;
 using ContosoUniversity.Data;
 using ContosoUniversity.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +17,18 @@ builder.Services.AddDbContext<SchoolContext>(options =>
 // Azure Service Bus processor lifecycle (start/stop) is managed by the host.
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
+
+// Register Azure Blob Storage client as a singleton (thread-safe, connection-pool reuse).
+// Authenticates via Managed Identity (DefaultAzureCredential).
+builder.Services.AddSingleton(sp =>
+{
+    var serviceUri = builder.Configuration["Storage:ServiceUri"]
+        ?? throw new InvalidOperationException(
+            "Storage:ServiceUri is not configured. " +
+            "Add it to appsettings.json: { \"Storage\": { \"ServiceUri\": \"https://<account>.blob.core.windows.net\" } }");
+    return new BlobServiceClient(new Uri(serviceUri), new DefaultAzureCredential());
+});
+builder.Services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();
 
 var app = builder.Build();
 
