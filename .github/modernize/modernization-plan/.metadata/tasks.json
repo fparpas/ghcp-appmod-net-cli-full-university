@@ -53,6 +53,7 @@
     {
       "type": "transform",
       "id": "003-transform-sql-to-azure-sql",
+      "status": "started",
       "description": "Migrate the SQL Server database connection to Azure SQL Database with Managed Identity (passwordless authentication).",
       "reason": "The application uses a hardcoded SQL Server connection string in Web.config with Integrated Security, which is not compatible with cloud deployments and does not follow the principle of least privilege. Azure SQL Database with Managed Identity provides a secure, passwordless alternative.",
       "requirements": "Migrate the SQL Server connection string from Web.config to use Azure SQL Database with Managed Identity (DefaultAzureCredential / passwordless). Update EF Core configuration to use the Azure SQL provider with token-based authentication compatible with .NET 10. Remove hardcoded connection strings. Ensure the DbContext is properly registered for Managed Identity access. Addresses assessment issues: SQL database connection detected, Connection strings without configuration builders detected.",
