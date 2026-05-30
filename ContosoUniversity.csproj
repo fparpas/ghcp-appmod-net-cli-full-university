@@ -6,7 +6,22 @@
     <RootNamespace>ContosoUniversity</RootNamespace>
     <AssemblyName>ContosoUniversity</AssemblyName>
   </PropertyGroup>
+  <!-- Exclude the test project subfolder from the main project's implicit compile glob -->
   <ItemGroup>
+    <Compile Remove="ContosoUniversity.Tests/**" />
+    <!-- Exclude the modernize assessment folder and test project subfolder from content copy -->
+    <Content Remove="ContosoUniversity.Tests/**" />
+    <Content Remove="modernize/**" />
+    <None Remove="ContosoUniversity.Tests/**" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>ContosoUniversity.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.14.0" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.19.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
       <PrivateAssets>all</PrivateAssets>

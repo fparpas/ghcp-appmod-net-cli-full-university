@@ -11,8 +11,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<SchoolContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add notification service as singleton (channel-based)
+// Register NotificationService as a singleton and as a hosted service so the
+// Azure Service Bus processor lifecycle (start/stop) is managed by the host.
 builder.Services.AddSingleton<NotificationService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
 
 var app = builder.Build();
 
