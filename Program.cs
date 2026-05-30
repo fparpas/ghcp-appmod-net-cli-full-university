@@ -9,6 +9,18 @@ using Microsoft.Identity.Web.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Azure App Configuration as a configuration source so all non-secret application
+// settings are loaded from the centralised store via Managed Identity.
+// The endpoint is injected by the deployment agent via AZURE_APP_CONFIGURATION_ENDPOINT.
+var appConfigEndpoint = Environment.GetEnvironmentVariable("AZURE_APP_CONFIGURATION_ENDPOINT");
+if (!string.IsNullOrEmpty(appConfigEndpoint))
+{
+    builder.Configuration.AddAzureAppConfiguration(options =>
+    {
+        options.Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential());
+    });
+}
+
 // Configure console logging for cloud-native log aggregation (Azure App Service / Azure Monitor)
 builder.Logging.AddJsonConsole(options =>
 {
