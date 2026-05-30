@@ -165,7 +165,13 @@
     {
       "type": "transform",
       "id": "007-transform-appsettings-to-app-configuration",
-      "status": "started",
+      "status": "success",
+      "summary": "Externalized non-secret app settings to Azure App Configuration using DefaultAzureCredential. Added Microsoft.Extensions.Configuration.AzureAppConfiguration 8.0.0. Wired provider in Program.cs with conditional loading via AZURE_APP_CONFIGURATION_ENDPOINT env var. Emitted .azure/configuration-migration.json seed file with 11 key-value entries. Build: 0 errors. Tests: 48/48 passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
       "description": "Externalize non-secret application settings from Web.config to Azure App Configuration.",
       "reason": "The application stores all configuration in Web.config including app settings and connection strings without using configuration builders. Hardcoded configuration prevents environment-specific overrides and is a security risk. Azure App Configuration provides centralized, dynamic configuration management.",
       "requirements": "Migrate non-secret application settings from Web.config / appsettings to Azure App Configuration using Managed Identity. Ensure the existing IConfiguration / IOptions\u003CT\u003E shape is preserved so that no application code changes are needed beyond configuration registration. Emit a .azure/configuration-migration.json seed file for the deployment agent. Addresses assessment issues: Connection strings without configuration builders detected, Legacy Configuration System.",
@@ -187,6 +193,13 @@
     {
       "type": "security",
       "id": "008-security-cve-remediation",
+      "status": "success",
+      "summary": "Remediated 3 vulnerabilities: Microsoft.Identity.Web/UI upgraded 3.7.1\u21923.8.2 (CVE-2025-32016, Medium), System.Security.Cryptography.Xml upgraded 9.0.0\u219210.0.6 (2x High CVEs). Final scan: 0 vulnerabilities across 18 dependencies. Build: 0 errors. Tests: 48/48 passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
       "description": "Scan all project dependencies for known CVEs and remediate identified vulnerabilities.",
       "reason": "The assessment identified that the project contains NuGet packages with known security vulnerabilities and deprecated packages. These must be remediated before production deployment.",
       "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, current version, upgraded version, and breaking change risk. Verify the project builds and all tests pass after remediation. Addresses assessment issues: NuGet package contains security vulnerability, NuGet package is deprecated, NuGet package upgrade is recommended.",
@@ -213,6 +226,8 @@
     {
       "type": "infrastructure",
       "id": "009-infrastructure-bicep",
+      "status": "success",
+      "summary": "Provisioned all Azure resources in swedencentral under app-mod-cli-full-uni: App Service (app-contoso-uni-2psof2l5), SQL Server/DB, Service Bus namespace+queue, Storage Account+container, App Configuration. RBAC roles assigned. App Configuration seeded with 11 key-values. App Service settings configured.",
       "description": "Generate Bicep IaC files and provision all required Azure resources in SwedenCentral under resource group app-mod-cli-full-uni.",
       "reason": "Azure resources must be provisioned before the application can be deployed. The application requires Azure App Service, Azure SQL Database, Azure Service Bus, Azure Blob Storage, and Azure App Configuration.",
       "requirements": "Generate Bicep IaC files for: Azure App Service Plan and App Service (for .NET 10 web app), Azure SQL Database, Azure Service Bus namespace and queue, Azure Storage Account with blob container for teaching materials, Azure App Configuration instance. Provision all resources in the SwedenCentral region under resource group app-mod-cli-full-uni. Configure Managed Identity for all service-to-service authentication. Assign appropriate RBAC roles to the App Service Managed Identity.",
@@ -232,6 +247,8 @@
     {
       "type": "deployment",
       "id": "010-deployment-appservice",
+      "status": "success",
+      "summary": "Successfully deployed ContosoUniversity .NET 10 to Azure App Service app-contoso-uni-2psof2l5.azurewebsites.net (HTTP 200 OK). Fixed SqlClient v7 AAD auth by adding Microsoft.Data.SqlClient.Extensions.Azure. SQL DB user provisioned, App Configuration seeded, RBAC roles confirmed. ZIP deploy completed in 65s.",
       "description": "Deploy the upgraded ContosoUniversity application to Azure App Service.",
       "reason": "The application needs to be deployed to Azure App Service after all migration tasks and infrastructure provisioning are complete.",
       "requirements": "Build and deploy the .NET 10 application to the Azure App Service provisioned in SwedenCentral (resource group: app-mod-cli-full-uni). Configure application settings including Azure App Configuration endpoint. Ensure Managed Identity is enabled and RBAC roles are correctly assigned for Azure SQL, Service Bus, Blob Storage, and App Configuration. Verify the deployment is healthy.",
