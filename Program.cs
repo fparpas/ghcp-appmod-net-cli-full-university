@@ -10,13 +10,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 using System;
 using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Microsoft Entra ID (formerly Azure AD) authentication using OIDC
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration);
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddMicrosoftIdentityUI();
+
+builder.Services.AddRazorPages();
 
 // Register EF Core DbContext
 builder.Services.AddDbContext<SchoolContext>(options =>
@@ -83,11 +91,13 @@ if (Directory.Exists(scriptsPath))
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapRazorPages();
 
 // Initialize database
 using (var scope = app.Services.CreateScope())

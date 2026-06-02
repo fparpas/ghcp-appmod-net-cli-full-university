@@ -1,0 +1,7 @@
+@{
+    ViewBag.Title = "Access Denied";
+}
+
+<h2>Access Denied</h2>
+<p>@(ViewBag.Message ?? "You do not have permission to access this resource.")</p>
+<p>Please <a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">sign in</a> with an authorized account.</p>

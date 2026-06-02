@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ContosoUniversity.Services;
@@ -25,7 +26,14 @@ namespace ContosoUniversity.Controllers
         {
             try
             {
-                var userName = "System";
+                // Use the authenticated user's name from Entra ID claims; fall back to "System" if unauthenticated
+                var userName = User?.Identity?.IsAuthenticated == true
+                    ? (User.FindFirst("name")?.Value
+                        ?? User.FindFirst(ClaimTypes.Name)?.Value
+                        ?? User.Identity.Name
+                        ?? "System")
+                    : "System";
+
                 await notificationService.SendNotificationAsync(entityType, entityId, entityDisplayName, operation, userName)
                     .ConfigureAwait(false);
             }

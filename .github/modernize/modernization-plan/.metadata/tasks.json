@@ -83,7 +83,13 @@
     {
       "type": "transform",
       "id": "004-transform-local-storage-to-azure-blob",
-      "status": "started",
+      "status": "success",
+      "taskSummary": "Migrated local file system storage to Azure Storage Blob with Managed Identity (DefaultAzureCredential). Added IBlobStorageService interface, AzureBlobStorageService implementation, updated CoursesController, Program.cs and appsettings.json. 20 new tests. Build: 0 errors, 53/53 tests passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      },
       "description": "Migrate teaching material image uploads in CoursesController from local file system storage to Azure Storage Blob with Managed Identity authentication.",
       "reason": "Azure App Service does not provide persistent local file system storage. The current implementation in CoursesController uses Server.MapPath and System.IO to save/read/delete files in ~/Uploads/TeachingMaterials/, which will not work reliably in a cloud environment. Azure Storage Blob provides scalable, durable, and cloud-native file storage.",
       "requirements": "Replace all local file I/O operations in Controllers/CoursesController.cs (file upload, directory creation, file deletion, path resolution via Server.MapPath) with Azure Storage Blob SDK operations. Use Managed Identity (DefaultAzureCredential) for authentication to Azure Storage — no connection strings or access keys. Maintain the same upload, retrieve, and delete file semantics. Update any image path references stored in the database to use Blob Storage URLs. Addresses assessment issues: Local or network IO operations detected.",
@@ -103,6 +109,7 @@
     {
       "type": "transform",
       "id": "005-transform-windows-auth-to-entra-id",
+      "status": "started",
       "description": "Replace Windows Authentication with Microsoft Entra ID (formerly Azure AD) for user authentication, enabling cloud-compatible identity management on Azure App Service.",
       "reason": "Windows Authentication is a Windows domain-only authentication method that does not work in Azure App Service environments. Microsoft Entra ID provides modern, standards-based authentication (OIDC/OAuth2) that is fully supported on Azure.",
       "requirements": "Remove Windows Authentication configuration from Web.config / IIS Express settings. Integrate Microsoft Entra ID authentication using ASP.NET Core authentication middleware. Configure the application to use Entra ID (OIDC) for user sign-in. Update any authentication/authorization code that relies on Windows identity. Addresses assessment issues: Windows authentication detected.",

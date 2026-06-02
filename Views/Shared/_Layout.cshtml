@@ -24,6 +24,23 @@
                     <li class="nav-item">@Html.ActionLink("Departments", "Index", "Departments", null, new { @class = "nav-link" })</li>
                     <li class="nav-item">@Html.ActionLink("Notifications", "Index", "Notifications", null, new { @class = "nav-link", title = "Notification Dashboard" })</li>
                 </ul>
+                <ul class="navbar-nav ms-auto">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <span class="nav-link text-light">Hello, @(User.FindFirst("name")?.Value ?? User.Identity.Name)!</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign Out</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign In</a>
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
     </nav>
