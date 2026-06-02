@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ContosoUniversity.Services;
 using ContosoUniversity.Models;
@@ -17,17 +18,16 @@ namespace ContosoUniversity.Controllers
             this.notificationService = notificationService;
         }
 
-        protected void SendEntityNotification(string entityType, string entityId, EntityOperation operation)
-        {
-            SendEntityNotification(entityType, entityId, null, operation);
-        }
+        protected Task SendEntityNotificationAsync(string entityType, string entityId, EntityOperation operation)
+            => SendEntityNotificationAsync(entityType, entityId, null, operation);
 
-        protected void SendEntityNotification(string entityType, string entityId, string entityDisplayName, EntityOperation operation)
+        protected async Task SendEntityNotificationAsync(string entityType, string entityId, string entityDisplayName, EntityOperation operation)
         {
             try
             {
                 var userName = "System";
-                notificationService.SendNotification(entityType, entityId, entityDisplayName, operation, userName);
+                await notificationService.SendNotificationAsync(entityType, entityId, entityDisplayName, operation, userName)
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {

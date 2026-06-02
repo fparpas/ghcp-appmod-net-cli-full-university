@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -45,14 +46,14 @@ namespace ContosoUniversity.Controllers
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Name,Budget,StartDate,InstructorID")] Department department)
+        public async Task<IActionResult> Create([Bind("Name,Budget,StartDate,InstructorID")] Department department)
         {
             if (ModelState.IsValid)
             {
                 db.Departments.Add(department);
                 db.SaveChanges();
 
-                SendEntityNotification("Department", department.DepartmentID.ToString(), department.Name, EntityOperation.CREATE);
+                await SendEntityNotificationAsync("Department", department.DepartmentID.ToString(), department.Name, EntityOperation.CREATE);
 
                 return RedirectToAction("Index");
             }
@@ -80,7 +81,7 @@ namespace ContosoUniversity.Controllers
         // POST: Departments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([Bind("DepartmentID,Name,Budget,StartDate,InstructorID,RowVersion")] Department department)
+        public async Task<IActionResult> Edit([Bind("DepartmentID,Name,Budget,StartDate,InstructorID,RowVersion")] Department department)
         {
             try
             {
@@ -89,7 +90,7 @@ namespace ContosoUniversity.Controllers
                     db.Entry(department).State = EntityState.Modified;
                     db.SaveChanges();
 
-                    SendEntityNotification("Department", department.DepartmentID.ToString(), department.Name, EntityOperation.UPDATE);
+                    await SendEntityNotificationAsync("Department", department.DepartmentID.ToString(), department.Name, EntityOperation.UPDATE);
 
                     return RedirectToAction("Index");
                 }
@@ -152,14 +153,14 @@ namespace ContosoUniversity.Controllers
         // POST: Departments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             Department department = db.Departments.Find(id);
             var departmentName = department.Name;
             db.Departments.Remove(department);
             db.SaveChanges();
 
-            SendEntityNotification("Department", id.ToString(), departmentName, EntityOperation.DELETE);
+            await SendEntityNotificationAsync("Department", id.ToString(), departmentName, EntityOperation.DELETE);
 
             return RedirectToAction("Index");
         }

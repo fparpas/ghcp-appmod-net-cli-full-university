@@ -17,3 +17,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+// Allow the unit-test project to access internal members (e.g. the test constructor
+// and GenerateMessage helper in NotificationService).
+[assembly: InternalsVisibleTo("ContosoUniversity.Tests")]

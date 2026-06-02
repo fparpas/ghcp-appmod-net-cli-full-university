@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ContosoUniversity.Services;
 using ContosoUniversity.Models;
@@ -14,14 +15,14 @@ namespace ContosoUniversity.Controllers
 
         // GET: api/notifications - Get pending notifications
         [HttpGet]
-        public IActionResult GetNotifications()
+        public async Task<IActionResult> GetNotifications()
         {
             var notifications = new List<Notification>();
 
             try
             {
                 Notification notification;
-                while ((notification = notificationService.ReceiveNotification()) != null)
+                while ((notification = await notificationService.ReceiveNotificationAsync()) != null)
                 {
                     notifications.Add(notification);
 

@@ -21,7 +21,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<SchoolContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register NotificationService as singleton (in-memory queue)
+// Register NotificationService as singleton — uses Azure Service Bus with Managed Identity
 builder.Services.AddSingleton<NotificationService>();
 
 var app = builder.Build();

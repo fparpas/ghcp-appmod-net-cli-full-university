@@ -12,7 +12,13 @@
     {
       "type": "upgrade",
       "id": "001-upgrade-dotnet",
-      "status": "started",
+      "status": "success",
+      "taskSummary": "Upgraded ContosoUniversity from .NET Framework 4.8 to .NET 10 (net10.0). Converted project to SDK-style, migrated ASP.NET MVC 5 to ASP.NET Core MVC, replaced Global.asax with Program.cs, updated routing, removed System.Web.Optimization, upgraded EF Core to 10.0.8, replaced MSMQ with in-memory queue placeholder, and migrated file upload to IFormFile. Build: 0 errors, 0 warnings.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
       "description": "Upgrade ContosoUniversity from .NET Framework 4.8 to .NET 10 (net10.0), converting the project to SDK-style and migrating all ASP.NET Framework APIs to ASP.NET Core.",
       "reason": "The project targets .NET Framework 4.8 which is end-of-life for mainstream support, uses legacy System.Web APIs incompatible with modern Azure SDKs, and has a non-SDK-style project file that blocks modern tooling. Upgrade is required to run on Azure App Service with .NET 10.",
       "requirements": "Upgrade the project target framework from .NET Framework 4.8 to net10.0. Convert the project file from legacy non-SDK-style to SDK-style format. Migrate ASP.NET MVC 5 (System.Web) to ASP.NET Core MVC. Migrate application startup from Global.asax.cs to Program.cs. Convert RouteCollection route registration to ASP.NET Core endpoint routing. Remove System.Web.Optimization bundling and minification; replace with direct HTML references to static files. Remove or replace all incompatible NuGet packages. Update all NuGet package references to versions compatible with net10.0. Resolve binding redirect conflicts. Addresses assessment issues: Project file needs to be converted to SDK-style, Project's target framework(s) needs to be changed, NuGet package is incompatible, NuGet package functionality is included with framework reference, Binary incompatible for selected .NET version, Source incompatible for selected .NET version, ASP.NET Framework (System.Web), Routes registration via RouteCollection is not supported in .NET Core, Convert application initialization code from Global.asax.cs to .NET Core, System.Web.Optimization bundling and minification is not supported in .NET Core, MSMQ & Message Queuing (framework-level), Legacy Configuration System, Binding redirect forces version downgrade, NuGet package upgrade is recommended, NuGet package is deprecated, Static content detected.",
@@ -25,6 +31,7 @@
     {
       "type": "transform",
       "id": "002-transform-msmq-to-servicebus",
+      "status": "started",
       "description": "Migrate the MSMQ-based NotificationService from System.Messaging to Azure Service Bus with Managed Identity authentication.",
       "reason": "MSMQ (System.Messaging) is a Windows-only, on-premises messaging technology that is not supported on Azure App Service or .NET 10. Azure Service Bus is the cloud-native replacement that provides reliable asynchronous messaging with Managed Identity support.",
       "requirements": "Replace all System.Messaging usage in Services/NotificationService.cs with Azure Service Bus SDK. Use Managed Identity (DefaultAzureCredential) for authentication to Azure Service Bus — no connection strings or credentials. Maintain the same send/receive notification semantics currently provided by the MessageQueue. Update the queue path configuration to use the Azure Service Bus namespace and queue name. Addresses assessment issues: MSMQ usage is detected, Convert System.Messaging to MSMQ in .NET Core, Binary incompatible for selected .NET version (NotificationService.cs).",
