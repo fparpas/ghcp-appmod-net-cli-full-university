@@ -1,14 +1,6 @@
-using System.Web.Mvc;
-
+﻿// FilterConfig.cs - Global filter registration is now done in Program.cs via AddControllersWithViews().
+// Error handling is configured using UseExceptionHandler in Program.cs.
 namespace ContosoUniversity
 {
-    public class FilterConfig
-    {
-        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
-        {
-            filters.Add(new HandleErrorAttribute());
-            // Remove the global authorization filter since we're implementing role-based authorization
-            // filters.Add(new AuthorizeAttribute()); // Require authentication for all controllers
-        }
-    }
+    // Global filters configuration moved to Program.cs
 }

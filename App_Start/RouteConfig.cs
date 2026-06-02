@@ -1,19 +1,6 @@
-using System.Web.Mvc;
-using System.Web.Routing;
-
+﻿// RouteConfig.cs - Routing is now configured in Program.cs using ASP.NET Core endpoint routing.
+// This file is kept for reference only.
 namespace ContosoUniversity
 {
-    public class RouteConfig
-    {
-        public static void RegisterRoutes(RouteCollection routes)
-        {
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-
-            routes.MapRoute(
-                name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
-        }
-    }
+    // Route registration moved to Program.cs: app.MapControllerRoute(...)
 }
