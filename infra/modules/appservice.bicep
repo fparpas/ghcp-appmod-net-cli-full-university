@@ -12,10 +12,10 @@ param tags object = {}
 
 @description('App Service Plan SKU')
 param sku object = {
-  name: 'B2'
-  tier: 'Basic'
-  size: 'B2'
-  family: 'B'
+  name: 'F1'
+  tier: 'Free'
+  size: 'F1'
+  family: 'F'
   capacity: 1
 }
 
@@ -46,8 +46,8 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
-      linuxFxVersion: 'DOTNET|10.0'
-      alwaysOn: true
+      linuxFxVersion: 'DOTNETCORE|10.0'
+      alwaysOn: false
       ftpsState: 'Disabled'
       http20Enabled: true
       minTlsVersion: '1.2'

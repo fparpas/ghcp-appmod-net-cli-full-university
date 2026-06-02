@@ -7,13 +7,6 @@ param location string = resourceGroup().location
 @description('Application short name used in resource naming')
 param appName string = 'contosouniv'
 
-@description('SQL Server administrator login')
-param sqlAdminLogin string = 'sqladmin'
-
-@description('SQL Server administrator password')
-@secure()
-param sqlAdminPassword string
-
 @description('Azure AD admin login name for SQL Server')
 param aadAdminLogin string
 
@@ -59,8 +52,6 @@ module sql 'modules/sql.bicep' = {
     sqlDatabaseName: sqlDatabaseName
     location: location
     tags: tags
-    administratorLogin: sqlAdminLogin
-    administratorLoginPassword: sqlAdminPassword
     aadAdminLogin: aadAdminLogin
     aadAdminObjectId: aadAdminObjectId
     aadTenantId: aadTenantId

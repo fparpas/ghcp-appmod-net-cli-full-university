@@ -5,8 +5,6 @@
     "environmentName": { "value": "dev" },
     "location": { "value": "eastus" },
     "appName": { "value": "contosouniv" },
-    "sqlAdminLogin": { "value": "sqladmin" },
-    "sqlAdminPassword": { "value": "" },
     "aadAdminLogin": { "value": "" },
     "aadAdminObjectId": { "value": "" },
     "aadTenantId": { "value": "" }

@@ -21,13 +21,24 @@ var builder = WebApplication.CreateBuilder(args);
 // The endpoint is injected via the AZURE_APP_CONFIGURATION_ENDPOINT environment variable
 // by the deployment agent. When the variable is absent (e.g. local dev), the app falls back
 // to the values in appsettings.json so the host continues to start normally.
+// The connection is marked optional=true so the app starts even when App Configuration
+// is temporarily unavailable (e.g. during RBAC propagation or network outages).
 var appConfigEndpoint = Environment.GetEnvironmentVariable("AZURE_APP_CONFIGURATION_ENDPOINT");
 if (!string.IsNullOrEmpty(appConfigEndpoint))
 {
-    builder.Configuration.AddAzureAppConfiguration(options =>
+    try
     {
-        options.Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential());
-    });
+        builder.Configuration.AddAzureAppConfiguration(options =>
+        {
+            options.Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential());
+        });
+        Console.WriteLine($"[Startup] Connected to Azure App Configuration: {appConfigEndpoint}");
+    }
+    catch (Exception ex)
+    {
+        // App Configuration is optional — the app can start without it using local/env config
+        Console.Error.WriteLine($"[Startup] Azure App Configuration unavailable: {ex.GetType().Name}: {ex.Message.Split('\n')[0]}. Falling back to app settings.");
+    }
 }
 
 // Add Microsoft Entra ID (formerly Azure AD) authentication using OIDC

@@ -14,7 +14,7 @@ param appConfigurationId string
 // Azure Service Bus Data Sender
 var serviceBusDataSenderRoleId = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
 // Azure Service Bus Data Receiver
-var serviceBusDataReceiverRoleId = '4f6d3b9f-4099-4b3c-ad6b-d7e3f2c3e8b2'
+var serviceBusDataReceiverRoleId = '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
 // Storage Blob Data Contributor
 var storageBlobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 // App Configuration Data Reader

@@ -204,6 +204,7 @@
     {
       "type": "deployment",
       "id": "009-deployment-appservice",
+      "status": "started",
       "description": "Deploy the modernized ContosoUniversity application to Azure App Service using Azure CLI with Bicep-provisioned infrastructure.",
       "reason": "The user requested deployment to Azure App Service. This task packages and deploys the .NET 10 application to the provisioned Azure App Service instance.",
       "requirements": "Build and deploy the .NET 10 ContosoUniversity application to Azure App Service. Use the Bicep infrastructure provisioned in task 008. Configure App Service application settings to connect to Azure SQL Database, Azure Service Bus, Azure Storage, and Azure App Configuration using Managed Identity. Set the .NET runtime stack to .NET 10.",

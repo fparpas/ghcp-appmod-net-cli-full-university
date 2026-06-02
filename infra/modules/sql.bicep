@@ -10,13 +10,6 @@ param location string
 @description('Resource tags')
 param tags object = {}
 
-@description('SQL administrator login')
-param administratorLogin string
-
-@description('SQL administrator password')
-@secure()
-param administratorLoginPassword string
-
 @description('Azure AD admin display name for SQL Server')
 param aadAdminLogin string
 
@@ -39,8 +32,6 @@ resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
   location: location
   tags: tags
   properties: {
-    administratorLogin: administratorLogin
-    administratorLoginPassword: administratorLoginPassword
     version: '12.0'
     minimalTlsVersion: '1.2'
     publicNetworkAccess: 'Enabled'
@@ -49,7 +40,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
       login: aadAdminLogin
       sid: aadAdminObjectId
       tenantId: aadTenantId
-      azureADOnlyAuthentication: false
+      azureADOnlyAuthentication: true
     }
   }
 }

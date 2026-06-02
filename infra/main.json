@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.43.8.12551",
-      "templateHash": "10903353311249979708"
+      "templateHash": "14092611466747481348"
     }
   },
   "parameters": {
@@ -29,19 +29,6 @@
       "defaultValue": "contosouniv",
       "metadata": {
         "description": "Application short name used in resource naming"
-      }
-    },
-    "sqlAdminLogin": {
-      "type": "string",
-      "defaultValue": "sqladmin",
-      "metadata": {
-        "description": "SQL Server administrator login"
-      }
-    },
-    "sqlAdminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "SQL Server administrator password"
       }
     },
     "aadAdminLogin": {
@@ -265,12 +252,6 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "administratorLogin": {
-            "value": "[parameters('sqlAdminLogin')]"
-          },
-          "administratorLoginPassword": {
-            "value": "[parameters('sqlAdminPassword')]"
-          },
           "aadAdminLogin": {
             "value": "[parameters('aadAdminLogin')]"
           },
@@ -288,7 +269,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.43.8.12551",
-              "templateHash": "2144492698226281972"
+              "templateHash": "18407979222969716910"
             }
           },
           "parameters": {
@@ -315,18 +296,6 @@
               "defaultValue": {},
               "metadata": {
                 "description": "Resource tags"
-              }
-            },
-            "administratorLogin": {
-              "type": "string",
-              "metadata": {
-                "description": "SQL administrator login"
-              }
-            },
-            "administratorLoginPassword": {
-              "type": "securestring",
-              "metadata": {
-                "description": "SQL administrator password"
               }
             },
             "aadAdminLogin": {
@@ -370,8 +339,6 @@
               "location": "[parameters('location')]",
               "tags": "[parameters('tags')]",
               "properties": {
-                "administratorLogin": "[parameters('administratorLogin')]",
-                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
                 "version": "12.0",
                 "minimalTlsVersion": "1.2",
                 "publicNetworkAccess": "Enabled",
@@ -380,7 +347,7 @@
                   "login": "[parameters('aadAdminLogin')]",
                   "sid": "[parameters('aadAdminObjectId')]",
                   "tenantId": "[parameters('aadTenantId')]",
-                  "azureADOnlyAuthentication": false
+                  "azureADOnlyAuthentication": true
                 }
               }
             },
