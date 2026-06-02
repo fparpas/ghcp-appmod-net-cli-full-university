@@ -161,6 +161,13 @@
     {
       "type": "security",
       "id": "007-security-cve-remediation",
+      "status": "success",
+      "taskSummary": "Scanned and remediated 1 CVE: GHSA-rpq8-q44m-2rpg (Medium) in Microsoft.Identity.Web/UI upgraded from 3.7.1 to 3.15.0. Final scan: 0 vulnerabilities. Build: 0 errors, 53/53 tests passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
       "description": "Scan all project dependencies for known CVEs and remediate any identified vulnerabilities to ensure the application is secure before deployment.",
       "reason": "The assessment identified NuGet packages with known security vulnerabilities and deprecated packages. Remediating these before deployment is required to ensure the application meets security standards.",
       "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, the current version, the upgraded major version, and the breaking change risk. Verify that the project builds and all tests pass after remediation. Addresses assessment issues: NuGet package contains security vulnerability, NuGet package is deprecated.",
@@ -180,6 +187,8 @@
     {
       "type": "infrastructure",
       "id": "008-infrastructure-bicep",
+      "status": "success",
+      "taskSummary": "Generated 13 Bicep IaC files for ContosoUniversity Azure infrastructure. Resources: App Service Plan (B2 Linux) + Web App (.NET 10, system-assigned MI), Azure SQL Server + Serverless GP_S_Gen5_2 Database, Service Bus Standard namespace + notifications queue, Storage Account (Standard_LRS) + teaching-materials blob container, App Configuration (Free). RBAC role assignments: Service Bus Data Sender, Service Bus Data Receiver, Storage Blob Data Contributor, App Configuration Data Reader. Deployment scripts for Windows (deploy.ps1) and Linux (deploy.sh). All Bicep files passed az bicep build validation. Provision: false (files generated, not yet provisioned).",
       "description": "Generate Bicep IaC files to provision all required Azure resources for the ContosoUniversity application.",
       "reason": "The user explicitly requested Bicep files for Azure deployment. Infrastructure as Code is required to provision Azure App Service, Azure SQL Database, Azure Service Bus, Azure Storage Account, and Azure App Configuration in a repeatable and version-controlled manner.",
       "requirements": "Generate Bicep IaC files to provision the following Azure resources: Azure App Service Plan and Web App (.NET 10), Azure SQL Database (with managed identity access), Azure Service Bus namespace and queue, Azure Storage Account and Blob container for teaching materials, Azure App Configuration store. Configure Managed Identity assignments between App Service and all dependent Azure services (SQL, Service Bus, Storage, App Configuration). Use Azure naming conventions and parameterize environment-specific values (environment name, location, resource names).",
