@@ -1,0 +1,76 @@
+name: Modernization CLI
+
+on:
+  workflow_dispatch:
+    inputs:
+      upgrade_target:
+        description: 'Upgrade target (e.g., Java 21)'
+        required: false
+        default: 'latest'
+
+permissions:
+    id-token: write
+    contents: write
+    actions: read
+
+jobs:
+  modernization:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Modernize CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/microsoft/modernize-cli/main/scripts/install.sh | sh
+
+      - name: Run Modernize CLI to upgrade code
+        run: |
+          TARGET="${{ github.event.inputs.upgrade_target }}"
+          if [ -z "$TARGET" ] || [ "$TARGET" = "latest" ]; then
+            modernize upgrade --no-tty
+          else
+            modernize upgrade "$TARGET" --no-tty
+          fi
+
+      - name: Push changes to result branch
+        id: push_changes
+        run: |
+          BRANCH_NAME="modernize-upgrade-${{ github.event.inputs.upgrade_target || 'latest' }}-$(date +%Y%m%d-%H%M%S)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git reset .github/workflows
+          git diff --cached --quiet || git commit -m "chore: apply Modernize CLI changes [skip ci]"
+          git checkout -B "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
+
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Display results summary
+        if: success()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Modernization Complete
+
+          ### Branch Information
+          - **Result Branch**: \`${{ steps.push_changes.outputs.BRANCH_NAME }}\`
+          - **Target**: ${{ github.event.inputs.upgrade_target || 'latest' }}
+
+          ### Links
+          - [View Branch](https://github.com/${{ github.repository }}/tree/${{ steps.push_changes.outputs.BRANCH_NAME }})
+          - [Create PR](https://github.com/${{ github.repository }}/compare/main...${{ steps.push_changes.outputs.BRANCH_NAME }})
+          EOF
+
+      - name: Upload Modernize CLI logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modernize-logs
+          path: ~/.modernize/logs/
+          if-no-files-found: warn
