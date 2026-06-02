@@ -20,6 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.14.2" />
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.19.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.28.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,7 +32,7 @@
   <ItemGroup>
     <Content Include="Content\**\*" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Scripts\**\*" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="Uploads\**\*" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Uploads folder removed: teaching material images are now stored in Azure Blob Storage -->
   </ItemGroup>
 
 </Project>

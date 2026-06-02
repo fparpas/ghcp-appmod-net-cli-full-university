@@ -57,7 +57,13 @@
     {
       "type": "transform",
       "id": "003-transform-sql-to-azure-sql",
-      "status": "started",
+      "status": "success",
+      "taskSummary": "Migrated SQL Server LocalDB connection to Azure SQL Database with Managed Identity (Authentication=Active Directory Default). Updated appsettings.json and Web.config, converted SchoolContextFactory to IDesignTimeDbContextFactory, added 11 new unit tests. Build: 0 errors, 29/29 tests passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      },
       "description": "Migrate the SQL Server database connection from a hardcoded LocalDB connection string to Azure SQL Database using Managed Identity (passwordless) authentication.",
       "reason": "The application uses a hardcoded SQL Server LocalDB connection string in Web.config with Integrated Security, which is not suitable for Azure deployment. Azure SQL Database with Managed Identity provides secure, passwordless access without storing credentials.",
       "requirements": "Update the Entity Framework Core SQL Server provider configuration to target Azure SQL Database. Replace the hardcoded LocalDB connection string with Azure SQL Database connection using Managed Identity (DefaultAzureCredential / passwordless). Remove the Integrated Security connection string from Web.config / appsettings.json. Ensure EF Core migrations continue to work with Azure SQL Database. Addresses assessment issues: SQL database connection detected, Connection strings without configuration builders detected.",
@@ -77,6 +83,7 @@
     {
       "type": "transform",
       "id": "004-transform-local-storage-to-azure-blob",
+      "status": "started",
       "description": "Migrate teaching material image uploads in CoursesController from local file system storage to Azure Storage Blob with Managed Identity authentication.",
       "reason": "Azure App Service does not provide persistent local file system storage. The current implementation in CoursesController uses Server.MapPath and System.IO to save/read/delete files in ~/Uploads/TeachingMaterials/, which will not work reliably in a cloud environment. Azure Storage Blob provides scalable, durable, and cloud-native file storage.",
       "requirements": "Replace all local file I/O operations in Controllers/CoursesController.cs (file upload, directory creation, file deletion, path resolution via Server.MapPath) with Azure Storage Blob SDK operations. Use Managed Identity (DefaultAzureCredential) for authentication to Azure Storage — no connection strings or access keys. Maintain the same upload, retrieve, and delete file semantics. Update any image path references stored in the database to use Blob Storage URLs. Addresses assessment issues: Local or network IO operations detected.",

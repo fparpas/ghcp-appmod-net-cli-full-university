@@ -1,8 +1,9 @@
+using Azure.Identity;
+using Azure.Storage.Blobs;
 using ContosoUniversity.Data;
 using ContosoUniversity.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,22 @@ builder.Services.AddDbContext<SchoolContext>(options =>
 
 // Register NotificationService as singleton — uses Azure Service Bus with Managed Identity
 builder.Services.AddSingleton<NotificationService>();
+
+// Register BlobServiceClient as singleton, authenticated via Managed Identity (DefaultAzureCredential).
+// Per Azure SDK guidance, BlobServiceClient is thread-safe and designed for singleton lifetime.
+builder.Services.AddSingleton(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var serviceUri = config["Storage:ServiceUri"]
+        ?? throw new InvalidOperationException(
+            "Storage:ServiceUri is not configured. " +
+            "Set it in appsettings.json or as an environment variable.");
+    return new BlobServiceClient(new Uri(serviceUri), new DefaultAzureCredential());
+});
+
+// Register AzureBlobStorageService as singleton — it holds a BlobContainerClient
+// (Azure SDK client) and must not be Scoped or Transient.
+builder.Services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();
 
 var app = builder.Build();
 
@@ -60,16 +77,9 @@ if (Directory.Exists(scriptsPath))
     });
 }
 
-// Serve static files from project-root Uploads/ folder
-var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "Uploads");
-if (Directory.Exists(uploadsPath))
-{
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(uploadsPath),
-        RequestPath = "/Uploads"
-    });
-}
+// NOTE: Teaching material images are now served from Azure Blob Storage.
+// The local Uploads/ static-file middleware has been removed as part of the
+// migration from local file system storage to Azure Blob Storage.
 
 app.UseRouting();
 

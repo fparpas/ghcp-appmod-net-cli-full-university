@@ -5,7 +5,6 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Hosting;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Services;
@@ -14,12 +13,12 @@ namespace ContosoUniversity.Controllers
 {
     public class CoursesController : BaseController
     {
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public CoursesController(SchoolContext db, NotificationService notificationService, IWebHostEnvironment webHostEnvironment)
+        public CoursesController(SchoolContext db, NotificationService notificationService, IBlobStorageService blobStorageService)
             : base(db, notificationService)
         {
-            _webHostEnvironment = webHostEnvironment;
+            _blobStorageService = blobStorageService;
         }
 
         // GET: Courses
@@ -79,21 +78,14 @@ namespace ContosoUniversity.Controllers
 
                     try
                     {
-                        var uploadsPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Uploads", "TeachingMaterials");
-                        if (!Directory.Exists(uploadsPath))
-                        {
-                            Directory.CreateDirectory(uploadsPath);
-                        }
-
                         var fileName = "course_" + course.CourseID + "_" + Guid.NewGuid() + fileExtension;
-                        var filePath = Path.Combine(uploadsPath, fileName);
+                        var contentType = GetContentType(fileExtension);
 
-                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        using (var stream = teachingMaterialImage.OpenReadStream())
                         {
-                            teachingMaterialImage.CopyTo(stream);
+                            course.TeachingMaterialImagePath = await _blobStorageService.UploadAsync(
+                                stream, fileName, contentType);
                         }
-
-                        course.TeachingMaterialImagePath = "~/Uploads/TeachingMaterials/" + fileName;
                     }
                     catch (Exception ex)
                     {
@@ -159,32 +151,18 @@ namespace ContosoUniversity.Controllers
 
                     try
                     {
-                        var uploadsPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Uploads", "TeachingMaterials");
-                        if (!Directory.Exists(uploadsPath))
-                        {
-                            Directory.CreateDirectory(uploadsPath);
-                        }
+                        // Delete the old blob before uploading the replacement.
+                        // DeleteAsync handles null/empty paths and legacy local paths gracefully.
+                        await _blobStorageService.DeleteAsync(course.TeachingMaterialImagePath);
 
                         var fileName = "course_" + course.CourseID + "_" + Guid.NewGuid() + fileExtension;
-                        var filePath = Path.Combine(uploadsPath, fileName);
+                        var contentType = GetContentType(fileExtension);
 
-                        // Delete old file if exists
-                        if (!string.IsNullOrEmpty(course.TeachingMaterialImagePath))
+                        using (var stream = teachingMaterialImage.OpenReadStream())
                         {
-                            var relativePath = course.TeachingMaterialImagePath.TrimStart('~').TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-                            var oldFilePath = Path.Combine(_webHostEnvironment.ContentRootPath, relativePath);
-                            if (System.IO.File.Exists(oldFilePath))
-                            {
-                                System.IO.File.Delete(oldFilePath);
-                            }
+                            course.TeachingMaterialImagePath = await _blobStorageService.UploadAsync(
+                                stream, fileName, contentType);
                         }
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            teachingMaterialImage.CopyTo(stream);
-                        }
-
-                        course.TeachingMaterialImagePath = "~/Uploads/TeachingMaterials/" + fileName;
                     }
                     catch (Exception ex)
                     {
@@ -228,22 +206,9 @@ namespace ContosoUniversity.Controllers
             Course course = db.Courses.Find(id);
             var courseTitle = course.Title;
 
-            if (!string.IsNullOrEmpty(course.TeachingMaterialImagePath))
-            {
-                var relativePath = course.TeachingMaterialImagePath.TrimStart('~').TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-                var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, relativePath);
-                if (System.IO.File.Exists(filePath))
-                {
-                    try
-                    {
-                        System.IO.File.Delete(filePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Error deleting file: " + ex.Message);
-                    }
-                }
-            }
+            // Delete the associated teaching material blob from Azure Blob Storage.
+            // DeleteAsync handles null/empty paths and legacy local paths gracefully.
+            await _blobStorageService.DeleteAsync(course.TeachingMaterialImagePath);
 
             db.Courses.Remove(course);
             db.SaveChanges();
@@ -251,6 +216,29 @@ namespace ContosoUniversity.Controllers
             await SendEntityNotificationAsync("Course", id.ToString(), courseTitle, EntityOperation.DELETE);
 
             return RedirectToAction("Index");
+        }
+
+        // ── Private helpers ─────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Maps a normalised image file extension to its MIME content-type string.
+        /// </summary>
+        private static string GetContentType(string fileExtension)
+        {
+            switch (fileExtension)
+            {
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".gif":
+                    return "image/gif";
+                case ".bmp":
+                    return "image/bmp";
+                default:
+                    return "application/octet-stream";
+            }
         }
     }
 }
