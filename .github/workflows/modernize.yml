@@ -39,7 +39,10 @@ jobs:
       - name: Push changes to result branch
         id: push_changes
         run: |
-          BRANCH_NAME="modernize-upgrade-${{ github.event.inputs.upgrade_target || 'latest' }}-$(date +%Y%m%d-%H%M%S)"
+          TARGET_RAW="${{ github.event.inputs.upgrade_target || 'latest' }}"
+          TARGET_SLUG="$(echo "$TARGET_RAW" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+//; s/-+$//')"
+          [ -n "$TARGET_SLUG" ] || TARGET_SLUG="latest"
+          BRANCH_NAME="modernize-upgrade-${TARGET_SLUG}-$(date +%Y%m%d-%H%M%S)"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
