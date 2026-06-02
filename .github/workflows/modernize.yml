@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       upgrade_target:
-        description: 'Upgrade target (e.g., Java 21)'
+        description: 'Upgrade target (e.g., Java 21 or .NET 10)'
         required: false
         default: 'latest'
 
