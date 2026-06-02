@@ -39,7 +39,7 @@ jobs:
       - name: Push changes to result branch
         id: push_changes
         run: |
-          BRANCH_NAME="modernize-upgrade-${{ github.event.inputs.upgrade_target || 'latest' }}-$(date +%Y%m%d-%H%M%S)"
+          BRANCH_NAME="modernize-upgrade-$(date +%Y%m%d-%H%M%S)"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
