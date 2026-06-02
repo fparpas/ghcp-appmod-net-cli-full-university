@@ -17,6 +17,19 @@ using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Wire up Azure App Configuration as an additional configuration source.
+// The endpoint is injected via the AZURE_APP_CONFIGURATION_ENDPOINT environment variable
+// by the deployment agent. When the variable is absent (e.g. local dev), the app falls back
+// to the values in appsettings.json so the host continues to start normally.
+var appConfigEndpoint = Environment.GetEnvironmentVariable("AZURE_APP_CONFIGURATION_ENDPOINT");
+if (!string.IsNullOrEmpty(appConfigEndpoint))
+{
+    builder.Configuration.AddAzureAppConfiguration(options =>
+    {
+        options.Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential());
+    });
+}
+
 // Add Microsoft Entra ID (formerly Azure AD) authentication using OIDC
 builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration);
 

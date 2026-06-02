@@ -109,7 +109,13 @@
     {
       "type": "transform",
       "id": "005-transform-windows-auth-to-entra-id",
-      "status": "started",
+      "status": "success",
+      "taskSummary": "Replaced Windows Authentication with Microsoft Entra ID using Microsoft.Identity.Web. Added OIDC configuration in appsettings.json, updated Program.cs with AddMicrosoftIdentityWebAppAuthentication, updated BaseController to use Entra ID claims, added sign-in/out UI. Build: 0 errors, 53/53 tests passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
       "description": "Replace Windows Authentication with Microsoft Entra ID (formerly Azure AD) for user authentication, enabling cloud-compatible identity management on Azure App Service.",
       "reason": "Windows Authentication is a Windows domain-only authentication method that does not work in Azure App Service environments. Microsoft Entra ID provides modern, standards-based authentication (OIDC/OAuth2) that is fully supported on Azure.",
       "requirements": "Remove Windows Authentication configuration from Web.config / IIS Express settings. Integrate Microsoft Entra ID authentication using ASP.NET Core authentication middleware. Configure the application to use Entra ID (OIDC) for user sign-in. Update any authentication/authorization code that relies on Windows identity. Addresses assessment issues: Windows authentication detected.",
@@ -129,6 +135,13 @@
     {
       "type": "transform",
       "id": "006-transform-config-to-azure-app-configuration",
+      "status": "success",
+      "taskSummary": "Externalized non-secret application settings to Azure App Configuration. Added Microsoft.Extensions.Configuration.AzureAppConfiguration 8.0.0 package, wired conditional AddAzureAppConfiguration in Program.cs using DefaultAzureCredential (Managed Identity), and emitted .azure/configuration-migration.json seed file with 10 non-secret key values (AzureAd, AzureServiceBus, Storage settings). Secrets and connection strings excluded. Build: 0 errors, 53/53 tests passed.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
       "description": "Externalize non-secret application settings from Web.config / appsettings.json to Azure App Configuration, eliminating hardcoded configuration in the application.",
       "reason": "The application has connection strings and app settings stored directly in Web.config without using configuration builders, making it unsuitable for cloud deployment. Azure App Configuration provides centralized, dynamic configuration management for cloud applications.",
       "requirements": "Move non-secret application settings (such as queue paths, feature flags, and app-level settings) from appsettings.json to Azure App Configuration. Ensure the existing IConfiguration / IOptions<T> shape is preserved so no application code changes are needed beyond configuration registration. Emit a .azure/configuration-migration.json seed file for the deployment agent. Do not move secrets (connection strings, keys) to App Configuration — those belong in Key Vault via managed identity (already handled by SQL and Service Bus tasks). Addresses assessment issues: Connection strings without configuration builders detected.",
