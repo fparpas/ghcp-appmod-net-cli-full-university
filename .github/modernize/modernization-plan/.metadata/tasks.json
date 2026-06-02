@@ -31,7 +31,13 @@
     {
       "type": "transform",
       "id": "002-transform-msmq-to-servicebus",
-      "status": "started",
+      "status": "success",
+      "taskSummary": "Migrated MSMQ NotificationService to Azure Service Bus with Managed Identity (DefaultAzureCredential). Added INotificationService interface, async methods, JSON serialization, unit tests (18/18 passed). Build: 0 errors, 0 warnings.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      },
       "description": "Migrate the MSMQ-based NotificationService from System.Messaging to Azure Service Bus with Managed Identity authentication.",
       "reason": "MSMQ (System.Messaging) is a Windows-only, on-premises messaging technology that is not supported on Azure App Service or .NET 10. Azure Service Bus is the cloud-native replacement that provides reliable asynchronous messaging with Managed Identity support.",
       "requirements": "Replace all System.Messaging usage in Services/NotificationService.cs with Azure Service Bus SDK. Use Managed Identity (DefaultAzureCredential) for authentication to Azure Service Bus — no connection strings or credentials. Maintain the same send/receive notification semantics currently provided by the MessageQueue. Update the queue path configuration to use the Azure Service Bus namespace and queue name. Addresses assessment issues: MSMQ usage is detected, Convert System.Messaging to MSMQ in .NET Core, Binary incompatible for selected .NET version (NotificationService.cs).",
@@ -51,6 +57,7 @@
     {
       "type": "transform",
       "id": "003-transform-sql-to-azure-sql",
+      "status": "started",
       "description": "Migrate the SQL Server database connection from a hardcoded LocalDB connection string to Azure SQL Database using Managed Identity (passwordless) authentication.",
       "reason": "The application uses a hardcoded SQL Server LocalDB connection string in Web.config with Integrated Security, which is not suitable for Azure deployment. Azure SQL Database with Managed Identity provides secure, passwordless access without storing credentials.",
       "requirements": "Update the Entity Framework Core SQL Server provider configuration to target Azure SQL Database. Replace the hardcoded LocalDB connection string with Azure SQL Database connection using Managed Identity (DefaultAzureCredential / passwordless). Remove the Integrated Security connection string from Web.config / appsettings.json. Ensure EF Core migrations continue to work with Azure SQL Database. Addresses assessment issues: SQL database connection detected, Connection strings without configuration builders detected.",
