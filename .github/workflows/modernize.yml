@@ -31,9 +31,9 @@ jobs:
         run: |
           TARGET="${{ github.event.inputs.upgrade_target }}"
           if [ -z "$TARGET" ] || [ "$TARGET" = "latest" ]; then
-            modernize upgrade --no-tty
+            modernize upgrade --source . --no-tty
           else
-            modernize upgrade "$TARGET" --no-tty
+            modernize upgrade "$TARGET" --source . --no-tty
           fi
 
       - name: Push changes to result branch
